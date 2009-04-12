@@ -1,0 +1,31 @@
+int echo(int n) {
+    write_string("echo\t");
+    write_int(n);
+    write_string("\n");
+    return n;
+}
+int ftrue(void) { write_string("True\n"); return 1; }
+int ffalse(void) { write_string("False\n"); return 0; }
+int main (void)
+{
+    ftrue() && ffalse();
+    ffalse() && ftrue();
+    ftrue() || ffalse();
+    ffalse() || ftrue();
+    echo(1) && echo(2) || echo(3);
+    echo(0) || echo(1) && echo(0) || echo(2);
+    if(echo(1)>echo(0)) {
+        if ( echo(4) == echo(5) )
+            echo(6);
+        else {
+            if(echo(6) != echo(7) && echo(9) >= echo(2) && (!echo(8) == echo(3) || echo(4)))
+                echo(4513);
+            if (echo(6) <= echo(7))
+                echo(9);
+            else
+                echo(10);
+            !echo(5) || echo(6) && echo(10);
+        }
+    }
+    return 0;
+}

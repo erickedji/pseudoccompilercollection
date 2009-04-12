@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wc-entries
+   xmlns="svn:">
+<entry
+   committed-rev="16"
+   name=""
+   committed-date="2008-04-16T07:30:45.777378Z"
+   url="file:///media/data/personnal_works/repository/pseudoc/trunk/tests"
+   last-author="eric"
+   kind="dir"
+   repos="file:///media/data/personnal_works/repository"
+   revision="16"/>
+<entry
+   committed-rev="16"
+   name="libpc.h"
+   text-time="2008-04-17T16:16:23.000000Z"
+   committed-date="2008-04-16T07:30:45.777378Z"
+   checksum="15124c56309c860fefa4477e1187db06"
+   last-author="eric"
+   kind="file"/>
+<entry
+   committed-rev="18"
+   name="array.c"
+   text-time="2008-04-16T11:42:58.000000Z"
+   committed-date="2008-04-16T11:45:02.133715Z"
+   checksum="944d4c2c43e9ad94179b818e6a37ad58"
+   last-author="eric"
+   kind="file"
+   revision="18"/>
+<entry
+   committed-rev="23"
+   name="syntaxtest.sh"
+   text-time="2008-04-17T19:30:21.000000Z"
+   committed-date="2008-07-23T00:33:58.770896Z"
+   checksum="259c6d38ae79ea6ab2cace66adbaed1d"
+   last-author="eric"
+   kind="file"
+   prop-time="2008-07-22T15:34:51.000000Z"
+   revision="23"/>
+<entry
+   committed-rev="20"
+   name="boolean.c"
+   text-time="2008-04-16T16:16:04.000000Z"
+   committed-date="2008-04-16T16:19:41.455938Z"
+   checksum="2a0f9ee2be39c8495995b4a9b8cc1971"
+   last-author="eric"
+   kind="file"
+   revision="20"/>
+<entry
+   committed-rev="22"
+   name="test.h"
+   text-time="2008-04-17T16:16:03.000000Z"
+   committed-date="2008-04-17T17:43:51.890941Z"
+   checksum="42194a8a67983af3dacb3f6e318e7530"
+   last-author="eric"
+   kind="file"
+   revision="22"/>
+<entry
+   committed-rev="23"
+   name="classics.c"
+   text-time="2008-04-17T19:06:24.000000Z"
+   committed-date="2008-07-23T00:33:58.770896Z"
+   checksum="00b17428151a4ee466a03c3e2a50f681"
+   last-author="eric"
+   kind="file"
+   revision="23"/>
+<entry
+   committed-rev="23"
+   name="runall.sh"
+   text-time="2008-04-17T17:38:54.000000Z"
+   committed-date="2008-07-23T00:33:58.770896Z"
+   checksum="7afc2ebc23b769624eeff33816fb601d"
+   last-author="eric"
+   kind="file"
+   prop-time="2008-07-22T15:34:40.000000Z"
+   revision="23"/>
+<entry
+   committed-rev="22"
+   name="flow.c"
+   text-time="2008-04-17T17:28:29.000000Z"
+   committed-date="2008-04-17T17:43:51.890941Z"
+   checksum="f34f218bf1174dd9db8805eaa54785c1"
+   last-author="eric"
+   kind="file"
+   revision="22"/>
+<entry
+   committed-rev="16"
+   name="io.c"
+   text-time="2008-04-15T13:44:55.000000Z"
+   committed-date="2008-04-16T07:30:45.777378Z"
+   checksum="ec17676ed076c86b75cd4b0bee9cca53"
+   last-author="eric"
+   kind="file"/>
+<entry
+   committed-rev="23"
+   name="libpc.c"
+   text-time="2008-05-24T18:51:22.000000Z"
+   committed-date="2008-07-23T00:33:58.770896Z"
+   checksum="d9035bccd7b22c7cf5babbc21c1aba10"
+   last-author="eric"
+   kind="file"
+   revision="23"/>
+<entry
+   committed-rev="20"
+   name="math.c"
+   text-time="2008-04-16T16:09:59.000000Z"
+   committed-date="2008-04-16T16:19:41.455938Z"
+   checksum="ec92d28cee1e3b441c88fab2700a7165"
+   last-author="eric"
+   kind="file"
+   revision="20"/>
+<entry
+   committed-rev="23"
+   name="scope.c"
+   text-time="2008-04-17T17:26:21.000000Z"
+   committed-date="2008-07-23T00:33:58.770896Z"
+   checksum="4469a70d4912f222ba7bd5d2a9532129"
+   last-author="eric"
+   kind="file"
+   revision="23"/>
+<entry
+   committed-rev="23"
+   name="identical.c"
+   text-time="2008-07-13T12:44:34.000000Z"
+   committed-date="2008-07-23T00:33:58.770896Z"
+   checksum="e968bbd7bbfabbe13268513902a00882"
+   last-author="eric"
+   kind="file"
+   revision="23"/>
+<entry
+   committed-rev="23"
+   name="runtest.sh"
+   text-time="2008-04-17T17:29:17.000000Z"
+   committed-date="2008-07-23T00:33:58.770896Z"
+   checksum="95540c52dd07156395e122cb8413cc38"
+   last-author="eric"
+   kind="file"
+   prop-time="2008-07-22T15:34:45.000000Z"
+   revision="23"/>
+</wc-entries>

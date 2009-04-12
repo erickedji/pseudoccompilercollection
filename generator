@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Script to lauch the scheme program generator.scm
+# (the DrScheme built-in executable creator is dying
+# with a rather mysterious error (cddr applied to a 
+# non cddrable value :-) ))
+
+mzscheme -f generator.scm

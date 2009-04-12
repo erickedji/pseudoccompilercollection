@@ -1,0 +1,35 @@
+int echo(int n) {
+    write_string("echo\t");
+    write_int(n);
+    write_string("\n");
+    return n;
+}
+int ftrue(void) { write_string("True\n"); return 1; }
+int ffalse(void) { write_string("False\n"); return 0; }
+int main (void)
+{
+    int i;
+    if(echo(1))
+        echo(2);
+    if(echo(0))
+        echo(3);
+    if(echo(1)) {
+        echo(4); echo(5);
+    } else
+        echo(6);
+    if (echo(0)) {
+        echo(7);
+        echo(8);
+    } else {
+        echo(9);
+        echo(10);
+    }
+    while(echo(0))
+        echo(1);
+    i = 5;
+    while(echo(1) && i) {
+        echo(10);
+        i = i - 1;
+    }
+    return 0;
+}

@@ -1,0 +1,77 @@
+
+PseudoC Compiler Collection.
+Compilateur et interprétateur de byte-code pour le PseudoC
+(un langage proche du C).
+
+KEDJI Komlan Akpédjé <eric.kedji@gmail.com>.
+http://erickedji.wordpress.com/
+
+Architecture de PCC:
+===================
+
+    Un fichier source PseudoC passe à travers les étages
+    suivant avant l'exécution:
+
+    -> Lexer (pc_lexer.c pc_lexer.lex pseudocl.c)
+    -> Scanner & Compiler (pc_parser.y pc_symtable.c pseudocc.c)
+    -> Intermediate Code (ic_generator.c ic_parser.c)
+    -> Byte Code (bc_generator.c)
+    -> Execution (interpreter.c pci_defs.c pseudoci.c)
+
+Compilation:
+===========
+    Un Makefile est inclus, il suffit de taper `make'
+    dans ce répertoire (utilisez `make clean' d'abord
+    pour supprimer les anciens exécutables et recompiler).
+
+    Le projet utilise BOEHM GC comme garbage collector
+    (à mettre dans le répertoire gc). Avant de taper
+    `make', rentrer dans le répertoire `gc' et taper:
+        $ ./configure; make
+    La dernière version de BOEHM GC est disponible ici:
+        http://www.hpl.hp.com/personal/Hans_Boehm/gc/
+
+Exécution:
+=========
+    pseudocl: lit l'entrée standard et affiche sur la
+        sortie standard les tokens lus.
+
+    pseudocc: compile les fichiers passées en argument
+        (lit la sortie standard s'il n'y a pas
+        d'argument) en un fichier contenant le code
+        intermédiaire (`PseudoCIntermediateCode.s').
+
+    pseudoci: recoit en argument un fichier (lit l'entrée
+        standard sinon) contenant du code intermédaire,
+        génère du byte-code, et l'interprête.
+        Le byte-code généré est enregistré dans un fichier
+        nommmé `PseudoCBinary.pcb'.
+
+Tests:
+=====
+    Dans le répertoire tests, le script `runall.sh'
+    exécute tous les tests sémantiques.
+
+    Pour exécuter les tests syntaxiques (`syntaxtest.sh'),
+    il faut disposer de DrScheme (http://www.drscheme.org/).
+
+
+Rapport:
+=======
+    Le rapport est dans le fichier `rapport.pdf'.
+
+Todo:
+=====
+    - Meilleure intégration de BOEHM GC
+    - Traitement décent des arguments en ligne de commande
+    - Ne pas regénérer le byte code si le code source n'a
+      pas changé
+    - Finir le travail sur la table de symboles pour permettre
+      la compilation de plusieurs fichiers
+    - Optimiser le byte-code généré (peep-hole optimisation)
+
+Licence:
+=======
+    Le code est dans le domaine public, sauf les librairies tierces qui sont
+    sous licence GPL. Abusez-en comme vous voulez. Gardez tout simplement une
+    trace de l'auteur original.

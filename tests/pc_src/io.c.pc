@@ -1,0 +1,6 @@
+int main(void) {
+    _ws("\t-> Testing io routines.\n");
+    write_int(10, 20, 30, 40, 50);
+    _ws("\tDone.\n");
+    return 0;
+}

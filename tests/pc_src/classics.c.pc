@@ -1,0 +1,86 @@
+int echo(int n) {
+    write_string("echo\t");
+    write_int(n);
+    write_string("\n");
+    return n;
+}
+int ftrue(void) { write_string("True\n"); return 1; }
+int ffalse(void) { write_string("False\n"); return 0; }
+int fib(int n) {
+    if ( n <= 1 )
+        return 1;
+    else
+        return fib(n - 1) + fib(n - 2);
+}
+int fact (int n) {
+    if (n <= 1)
+        return 1;
+    else
+        return n * fact(n - 1);
+}
+int myremainder(int a, int b) {
+    if ( b == 0) {
+        write_string("myremainder(a, b): error: b is 0\n");
+        return 0;
+    }
+    if ( b < 0 )
+        return myremainder(a, -b);
+    if ( a < 0 )
+        return - myremainder(-a, b);
+    if ( a < b ) return a;
+    if ( a == b ) return 0;
+    return myremainder(a - b, b);
+}
+int gcd(int a, int b) {
+    if ( b == 0)
+        return a;
+    else
+        return gcd(b, myremainder(a, b));
+}
+int prime(int n) {
+    int i;
+    i = 2;
+    while(i < n) {
+        if (n % i == 0)
+            return 0;
+        i = i + 1;
+    }
+    return 1;
+}
+int ack(int x, int y) {
+    if ( y == 0 )
+        return 0;
+    if ( x == 0 )
+        return 2 * y;
+    if ( y == 1 )
+        return 2;
+    return ack( x - 1, ack(x, y - 1));
+}
+int square(int n) { return n * n; }
+int even (int n) { return myremainder(n, 2) == 0; }
+int fastexpt(int b, int n) {
+    if ( n == 0) return 1;
+    if (even(n))
+        return square(fastexpt(b, n/2));
+    else
+        return b * fastexpt(b, n - 1);
+}
+int main (void)
+{
+    write_string("\nLanguage flamewar classics.\n");
+    write_string("\nfibonacci(10)=\t");
+    write_string("");
+    write_int(fib(10));
+    write_string("\nfactorial(8)=\t");
+    write_int(fact(10));
+    write_string("\ngcd(84, 56)=\t");
+    write_int(gcd(84, 56));
+    write_string("\nprime(761)=\t");
+    write_int(prime(761));
+    write_string("\nackermann(2, 3)=\t");
+    write_int(ack(2, 3));
+    write_string("\nfastexpt(2, 10)=\t");
+    write_int(fastexpt(2, 10));
+    write_string("\nBye\n");
+    return 0;
+}

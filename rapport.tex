@@ -1,0 +1,547 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%  KEDJI Komlan Akpédjé <eric.kedji@gmail.com>
+%%  http://erickedji.wordpress.com/
+%%  
+%%  Rapport du project de compilation (PseudoC)
+%%  Jeudi 17 Avril 2008
+%%  ENSIAS
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt,a4paper,openright]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[english,french]{babel}
+\usepackage{url}
+\usepackage[T1]{fontenc}
+\usepackage{charter}
+\usepackage{verbatim} % for verbatim input
+\usepackage{fancyhdr}
+\usepackage{fancyvrb}
+\usepackage[Sonny]{fncychap}
+\usepackage{simplemargins}
+\usepackage[pdftex]{graphicx}
+
+% eviter l'espace après les deux points dans une url
+\let\urlorig\url
+\renewcommand{\url}[1]{%
+   \begin{otherlanguage}{english}\urlorig{#1}\end{otherlanguage}%
+}
+
+\pagestyle{fancy}
+% with this we ensure that the chapter and section
+% headings are in lowercase.
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\fancyhf{} % delete current setting for header and footer
+\fancyhead[LO]{\it\bfseries\leftmark}
+\fancyhead[RO]{\bfseries\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
+\addtolength{\headheight}{0.5pt} % make space for the rule
+\fancypagestyle{plain}{%
+   \fancyhead{} % get rid of headers on plain pages
+   \renewcommand{\headrulewidth}{0pt} % and the line
+}
+
+\newcommand{\nom}[1]{\textsc{\texttt{#1}}}
+\newcommand{\pc}{\nom{PseudoC}}
+\newcommand{\pcc}{\nom{PseudoC Compiler Collection}}
+\newcommand{\ce}{\nom{C}}
+\newcommand{\flex}{\nom{Flex}}
+\newcommand{\bison}{\nom{Bison}}
+\newcommand{\ensias}{\nom{ENSIAS}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% begin nss style title
+\newlength{\centeroffset}
+\setlength{\centeroffset}{-0.5\oddsidemargin}
+\addtolength{\centeroffset}{0.5\evensidemargin}
+\newcommand{\showtitle}{
+    %\addtolength{\textwidth}{-\centeroffset}
+    \thispagestyle{empty}
+    \vspace*{\stretch{1}}
+    \noindent\hspace*{\centeroffset}\makebox[0pt][l]{\begin{minipage}{\textwidth}
+    \flushright
+    {\Huge\bfseries Implémentation d'un générateur \\
+    de byte-code et d'un interprêtateur \\
+    pour le langage PseudoC
+    }
+    \noindent\rule[-1ex]{\textwidth}{5pt}\\[2.5ex]
+    \hfill\emph{\Large Projet du module ``Compilation'' - \ensias{}}
+    \end{minipage}}
+
+    \vspace{\stretch{1}}
+    \noindent\hspace*{\centeroffset}\makebox[0pt][l]{\begin{minipage}{\textwidth}
+    \flushright
+    {\bfseries 
+    Komlan Akpédjé KEDJI\\[1.5ex]}
+    Mars - Avril 2008 \\[1.5ex]
+    Sous la direction de: {\bfseries Professeur Habilité Karim BAINA}
+    \end{minipage}}
+} % end new command showtitle
+%\addtolength{\textwidth}{\centeroffset}
+\vspace{\stretch{2}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% end nss style title
+
+\setleftmargin{3cm}
+\setrightmargin{3cm}
+\settopmargin{3cm}
+\setbottommargin{3cm}
+\setlength{\parskip}{0.5cm}
+
+\usepackage[pdftex,%
+    colorlinks=true,%
+    linkcolor=blue,%
+    bookmarks=true,%
+    pdftitle={Générateur de byte-code et Interpréteur pour le langage PseudoC - KEDJI Komlan Akpédjé},%
+    pdfauthor={KEDJI Komlan Akpédjé (eric.kedji@gmail.com)}]{hyperref} %must be the last in the preambule!
+
+\begin{document}
+
+\showtitle
+
+\tableofcontents
+
+\begin{abstract}
+Dans le cadre du cours de compilation, il est implémenté une collection d'outils
+(\nom{PCC}: \pcc) permettant d'exécuter du code écrit en \pc{} (une version
+allégée du langage \ce). Le présent document documente les diverses stratégies
+et compromis utilisés tout au long du processus, et discute de leur pertinence
+vu les résultats obtenus.
+\end{abstract}
+
+
+
+\chapter{Introduction}
+    \begin{quote}
+    \emph{``Fools ignore complexity. Pragmatists suffer it. Some can
+    avoid it. Geniuses remove it.''} \\
+    -- Alan J. Perlis (Epigrams in programming).\cite{EIP}
+    \end{quote}
+
+    S'il existe un trait caractéristique du développement d'un compilateur, il
+    s'agit bien de la complexité\footnote{Il n'est donc pas surprennant que
+    d'importants travaux de recherche soient menés sur le sujet, voir
+    \cite{EHC}.}.Le présent rapport présente les stratégies utilisées pour
+    contrôler cette complexité, dans le cadre de l'implémentation d'une suite
+    d'outils permettant d'exécuter du code \pc.
+
+    De \cite{EHC} nous retenons qu'une stratégie éfficace pour contrôler
+    la complexité d'un compilateur est d'utiliser des représentations
+    intermédiares bien définies. Ceci permet de décrire la transformation
+    du program source en exécutable comme une série de transformations
+    sur un flux de données. Le présent rapport est structuré de manière
+    à réfléter ce processus.
+
+    En effet, le passage d'un code source en \pc{} à l'exécution traverse les
+    étapes suivantes:
+
+    \emph{Code Source (PseudoC) -> Code Intermédiare -> Byte-Code -> Exécution}
+
+\chapter{L'analyseur lexical de code \pc}
+    L'analyseur lexical a été généré par \flex, à partir du fichier
+    d'entrée \texttt{pc\_lexer.lex}.
+
+    En dehors du code classique d'analyse lexical, les fonctionnalités
+    suivantes sont introduites:
+
+    \begin{itemize}
+        \item Sauvegarde des positions (ligne, colonne) de chaque
+        token. Ceci permettra par la suite de donner des messages
+        d'erreur utiles lors de la compilation.
+        \item Vérifications de base sur les chaines de caractères: les
+        chaines invalides (contenant des retour chariot) et celles trop
+        longues\footnote{Les chaines littérales en \pc{} ont une longueur
+        maximale de 256 caractères.} sont détectées.
+    \end{itemize}
+
+\chapter{L'analyseur syntaxique de code \pc}
+    L'analyseur lexical a été généré par \bison, à partir du fichier
+    d'entrée \texttt{pc\_parser.y}.
+
+    Le fichier \texttt{pc\_parser.y} implémente la grammaire du \pc. Le
+    compilateur construit étant à une passe, l'AST (Abstract Syntax
+    Tree) est implicite, et les actions sémantiques effectuent
+    directement les appels nécessaires pour générer le code
+    intermédiare. En effet, la construction d'un AST ne se justifie pas
+    vu la simplicité des structures syntaxiques du \pc.
+
+\begin{quote}
+\emph{``There are two ways of constructing a software design; one way is to make
+it so simple that there are obviously no deficiencies, and the other way
+is to make it so complicated that there are no obvious deficiencies. The
+first method is far more difficult.''} \\
+-- C. A. R. Hoare
+\end{quote}
+
+    Une règle de la grammaire a donc la forme suivante:
+\begin{verbatim}
+instruction: WRITESTR '(' STR ')' ';'
+    { emit(OPWRITESTR, $3); }
+    ...
+\end{verbatim}
+
+    Ici, le token \texttt{WRITESTR} est reconnu, suivi d'une parenthèse
+    ouvrante, un argument (une chaine de caractère littérale), puis une
+    parenthèse fermante. L'action correspondante est de générer l'instruction de
+    code intermédiaire nommée \texttt{OPWRITESTR}, avec comme argument, le
+    troisième token, ie \texttt{STR}.
+    
+    Les actions sémantiques font des appels au module implémentant la
+    table de symboles (\texttt{pc\_symtable.c}). Cette dernière est
+    implémentée comme une table de hachage\footnote{L'implémentation de
+    la table de hashage est contenue dans le fichier \texttt{uthash.h},
+    et provient du projet \nom{UTHASH} sur
+    \texttt{http://uthash.sourceforge.net}.}. Ceci permet de compiler de
+    larges programmes \pc, sans pénalité de performance majeure (causée
+    par une recherche linéaire dans une liste chainée).
+    
+\chapter{Le générateur de code intermédiare}
+    Le fichier \texttt{ic\_generator.c} implémente la génération de code
+    intermédiare. Le point central est la fonction \texttt{emit} dont le
+    prototype est:
+
+    \texttt{void emit(int instruction, ...);}
+
+    \texttt{emit} prend un nombre variable d'arguments (suivant
+    l'instruction) et génère le code approprié. Pour rendre les
+    modifications plus simples, la correspondance entre le numéro d'une
+    instruction du code intermédiare, et la représentation textuelle de
+    l'opérateur, est maintenue dans le fichier \texttt{ic\_generator.h}
+    (tous les modules désirant faire cette conversion y font appel).
+    Ceci permet de modifier la représentation textuelle des opérateurs
+    en mettant à jour un seul fichier.
+
+    Le code intermédiare utilisé est à zero adresse. Le code généré
+    étant destiné à être interprêté, il est tout à fait inutile
+    d'utiliser un code à plus d'une adresse. En effet, d'une part les
+    opérandes ne seront jamais rangés dans les régistres réels de la
+    machine\footnote{Suggérer au compilateur C de mettre une variable
+    dans un registre n'est pas suffisant, le standard \ce{} précise qu'il
+    s'agit seulement d'une suggestion, pas un ordre.}, i.e. il n'y a
+    aucun gain en performance. D'autre part, on évite ainsi la
+    complexité liée à l'allocation des registres, et on bénéficie de la
+    densité de code caractéristique des codes à une adresse.
+
+\begin{quote}
+\emph{``Any fool can make the simple complex, only a smart person can make the
+complex simple.''} \\
+-- [Anonymous]
+\end{quote}
+
+    Il faut noter que le code intermédiare choisi est optimisé pour la
+    lisibilité. Il est possible de programmer directement dans le code
+    intermédiare. le fichier généré à l'extension \texttt{.s}, ce qui permet de
+    l'analyser avec la coloration syntaxique sous un éditeur comme \texttt{vim}.
+    Ceci est d'une aide précieuse lors du debuggage.
+
+\chapter{L'analyseur syntaxique de code intermédiare}
+    Le code intermédiare généré étant du texte, il nous faut un analyseur
+    synthaxique pour l'exploiter. Cette fonction est implémenté par
+    le fichier \texttt{ic\_parser.c}
+
+    Il s'agit de la première phase de l'interprétation. C'est une étape
+    simple qui n'est isolée que pour des raisons de modularité.
+    \texttt{ic\_parser.c} se résume à la fonction
+    \texttt{next\_ic\_inst} qui retourne, à chaque appel, une
+    représentation structurée de la prochaine instruction du fichier
+    contenant le code intermédiaire. Il s'agit de récupérer une instruction du
+    langage intermédiaire, et de le transformer en une structure de données
+    directement exploitable par le générateur de byte-code.
+
+\chapter{Le générateur de byte-code}
+    Le fichier \texttt{bc\_generator.c} implémente le générateur de byte-code.
+
+    Le byte-code généré est rangé dans un tableau \texttt{code} qui
+    émule la RAM de l'ordinateur. Une copie est stockée dans un fichier,
+    pour éviter de regénérer le byte-code lors des éxécutions
+    ultérieures\footnote{\nom{Python} utilise une tactique similaire.
+    Avant d'interpréter un fichier \texttt{foo.py}, Python génère un
+    fichier de byte-code \texttt{foo.pyc}. Le byte-code est utilisé lors
+    des appels ultérieurs.}.
+
+    Le byte-code présente l'avantage d'être très compact. Les instructions
+    sans opérande (comme les opérateurs arithmétiques) n'occupent q'un
+    octect. Celles qui opérent sur des emplacements mémoire (comme
+    l'assignation de variable) sont suivis d'une adresse qui est un
+    entier stocké sur quatre octects. La taille d'une instruction varie
+    donc entre 1 et 5 octets.
+
+\chapter{L'interpréteur}
+    Le fichier \texttt{interpreter.c} implémente l'interprétation du
+    byte-code, et a contient essentiellement la fonction \texttt{run}.
+    Il faut noter que la convention d'appel (ou \emph{stack-layout}) implémentée
+    ici pour le \pc{} est la même que celle du langage \ce.
+
+    Au moment de l'éxécution, \texttt{run} utilise les structures
+    suivantes:
+
+    \begin{itemize}
+        \item Une pile d'appels (\texttt{call\_stack}). Elle contient
+        les adresses de retour des fonctions et les copies des adresses
+        des cadres d'activation (voir plus bas).
+        \item Un pointeur de pile d'appels (\texttt{call\_stackp}). Il
+        pointe sur le prochain emplacement libre sur la pile d'appels.
+        \item Une pile d'expressions (\texttt{expr\_stack}). Elle
+        contient les valeurs sur lequelles les opérateurs calculent
+        (le code est à une adresse: tous les calculs sont faits sur la
+        pile).
+        \item Un pointeur de pile d'expressions (\texttt{expr\_stackp}).
+        Il pointe sur le prochain emplacement libre sur la pile
+        d'expressions.
+        \item Un pointer de frame (\texttt{framep}). Il contient
+        l'adresse du début du cadre d'activation courant (i.e. celui de la
+        fonction en cours d'exécution).
+        \item Un compteur de programme (\texttt{instp}). Il contient
+        l'adresse de l'instruction suivante.
+    \end{itemize}
+
+\chapter{Utilitaires et support de debuggage}
+    Une série d'utilitaires a été mise au point pour faciliter
+    l'utilisation de \pcc, et surtout faciliter le debuggage.
+
+    Commençons par noter que l'analyseur syntaxique est par défaut très
+    verbeux. Il donne des détails précis sur les erreurs rencontrées
+    pour permettre au programmeur des les répérer et les corriger le
+    plus vite possible. Un exemple de sortie est le suivant:
+
+\begin{verbatim}
+Duplicated identifier: `i': line 68, line 70
+Type mismatch: variable `tableau':
+    decl[ARRAY]: line 67, use[INT]: line 80
+Function `longueur' used as a variable:
+    decl: line 4, use: line 119
+Redefined function: `afficher': line 8, line 186
+Undeclared variable: `total': line 98
+Function prototype mismatch: `size': line 1, line 2
+    First: Function `size':       INT -> INT
+    Second: Function `size':      [Procedure] -> INT
+Undeclared function `foobar' (line 5)
+`bar' is not a function (line 6)
+\end{verbatim}
+
+    \section{L'utilitaire \texttt{pseudocl}}
+        \texttt{pseudocl} affiche une version \textit{human-readable}
+        d'une source \pc. Il est ainsi possible de visualiser le
+        résultat obtenu après la phase d'analyse lexicale. Exemple
+        d'utilisation:
+
+\begin{verbatim}
+$ pseudocl <<EOF
+> int foo; static int bar;
+> int main(void){ write_int(2*5/6); return 0;}
+> EOF
+INT         IDENTIFIER  SEMI_COLON
+STATIC      INT         IDENTIFIER  SEMI_COLON
+INT         IDENTIFIER  PAREN_OPEN  VOID
+PAREN_CLOSE BRACE_OPEN  WRITE_INT   PAREN_OPEN
+NUMBER      MULTIPLY    NUMBER      DIVIDE
+NUMBER      PAREN_CLOSE SEMI_COLON  RETURN
+NUMBER      SEMI_COLON  BRACE_CLOSE
+$ 
+\end{verbatim}
+
+    \section{L'utilitaire \texttt{opname}}
+        Quand on ne dispose que du byte-code (on peut en avoir une
+        représentation `lisible' avec l'utilitaire \nom{UNIX}{} \texttt{xxd}),
+        il est utile de pouvoir obtenir le nom d'un opérateur à partir de
+        son numéro donné sous forme décimale ou hexadécimale. L'utilitaire
+        \texttt{opname} a été conçu à cet effet. Exemple d'utilisation:
+
+\begin{verbatim}
+$ opname
+ Utility to get an operator name from its code
+  -> code in decimal: no prefix (ex: `45')
+  -> code in hexadecimal: prefix `x' (ex: `x1c')
+
+        Usage:   opname <dec_code> | opname x<hex_code>
+
+$ opname 30
+ dec=30  hex=1e  CALL
+$ opname x10
+ dec=16  hex=10  POP
+$ opname x41
+ Unknown opcode: dec=65  hex=41
+$
+\end{verbatim}
+
+
+    \section{Mode pas à pas dans l'interpréteur}
+        L'interprétateur fonctionne en mode pas à pas, lorque la
+        macro \nom{NDEBUG} n'est pas définie au moment de la compilation.
+        
+        Dans ce mode, la confirmation de l'utilisateur est demandée
+        avant l'exécution de chaque instruction du byte-code, et de très
+        utiles informations (état de la pile d'appel, état de la pile
+        d'instruction, code et nom de l'instruction suivante, ...) sont
+        affichées. Exemple d'éxécution:
+
+\begin{verbatim}
+ -> call stack dump:
+ [7]: 2         (hex:2)
+ [6]: 0         (hex:0)
+ [5]: 0         (hex:0)
+ [4]: 42        (hex:2a)
+ [3]: 42        (hex:2a)
+ [2]: 42        (hex:2a)
+ [1]: 6         (hex:6)
+ [0]: 0         (hex:0)
+ -> expr stack dump:
+ [0]: 2         (hex:2)
+ next instruction: 38 (PUSHC)   at 212  (hex:d4)
+ press enter to continue
+\end{verbatim}
+
+\chapter{Le jeu de tests}
+    \section{Tests de syntaxe}
+        Lors du développement, il est utile de pouvoir tester la
+        validité de l'analyseur syntaxique. Il est cependant difficile
+        d'écrire un programme de test contenant toutes les combinaisons
+        syntaxiques possible.
+
+        Un programe \nom{Scheme}, \texttt{generator.scm}, qui génère
+        aléatoirement des programmes \pc{} syntaxiquement valides, a donc été
+        implémenté. Une approche similaire a discutée dans \cite{AGTC}.
+
+        Le programme \texttt{generator.scm} est lui-même une démonstration de la
+        puissance méta-syntaxique des macros en \nom{Scheme}.
+        En effet, le code ressemble à s'y méprendre à la spécification
+        \nom{BNF} du \pc. Extrait:
+
+\begin{verbatim}
+(define-production (int)
+  (number->string (random 1000000)))
+
+(define-production (binary-op d)
+  ">" "<" "==" "<=" ">=" "!=" "+"
+  "-" "*" "/" "%" "||" "&&")
+
+(define-production (function-body)
+  (string-append "{\n"
+      (list-of declaration "\n\t")
+      "\n"
+      (list-of instruction "\n\t")
+      "\n}\n"))
+\end{verbatim}
+
+        Le script shell \texttt{syntaxtest.sh} permet de lancer un
+        nombre paramétrable de tests sur des programmes
+        générés avec \texttt{generator.scm}.
+
+    \section{Tests de sémantique}
+        Une élégant framework de test a été mis en place pour le compilateur
+        \pc. Le framework s'appuie sur le constat qu'un programme \pc{} est à
+        quelques modifications près, un programme \ce{} valide. On peut donc
+        compiler un même programme avec le compilateur \pc{} (\texttt{pseudocc})
+        et le compilateur \ce{} (\texttt{gcc}), et comparer les sorties des deux
+        exécutables. Une approche similaire a été utilisée par \cite{FS} pour
+        détecter plusieurs bugs dans \nom{GCC}.
+
+
+        Le framework de test contient les fichiers suivants:
+
+        \begin{itemize}
+            \item \texttt{libpc.c}: implémentation en \ce{} des appels
+            système du \pc{} (\texttt{write\_int}, \texttt{write\_string},
+            \ldots).
+            \item \texttt{libpc.h}: définitions de macro permettant
+            de générer du code \ce{} ou du code \pc{} à partir d'une représentation
+            unifiée.
+            \item \texttt{test.h}: fonctions générales utiles
+            pour les cas de test (valides en \ce{} et en \pc).
+            \item \texttt{runtest.sh}: shell script permettant d'exécuter un
+            test.
+            \item \texttt{runall.sh}: shell script permettant d'exécuter tous
+            les cas de test disponibles.
+            \item \texttt{identical.c}: source de l'utilitaire permettant de
+            détecter si deux fichiers sont identiques. Même si cet utilitaire
+            donne l'impression de réinventer \texttt{diff}, il a l'avantage de
+            terminer à la détection de la première différence entre les deux
+            fichiers, ce qui est plus efficace dans notre cas.
+        \end{itemize}
+
+\begin{quote}
+\emph{``The good thing about reinventing the wheel is that you get a round
+one.''} \\
+-- Douglas Crockford (Author of JSON and JsLint)
+\end{quote}
+
+        Les cas de test implémentés sont les suivants:
+        \begin{description}
+            \item[io]:\\ Opérations d'entrée sortie (write\_int,
+            write\_string)
+            \item[math]:\\ Calculs arithmétiques (+, -, /, *, \%)
+            \item[array]:\\ Utilisation des tableaux
+            \item[boolean]:\\ Test des opérateurs booléen (\&\&, ||, !, short-circuit)
+            \item[flow]:\\ Opérateurs de controle (if, while)
+            \item[classics]:\\ Fonctions classiques (factoriel, fibonnaci,
+            ackermann, primalité, plus grand commun diviseur)
+        \end{description}
+
+        Bien entendu, le compilateur passe tous les tests avec succès.
+
+\chapter{Conclusion}
+\begin{quote}
+\emph{``[\dots] Hence my urgent advice to all of you to reject the morals of the
+bestseller society and to find, to start with, your reward in your own
+fun. This is quite feasible, for the challenge of simplification is so
+fascinating that, if we do our job properly, we shall have the greatest
+fun in the world.''} \\
+-- E. W. Dijkstra, On the nature of computing science.\cite{ONCS}
+\end{quote}
+
+    Le développement de \pcc{} a été une immense partie de plaisir.
+
+    Le développement d'un compilateur est une occasion unique pour entrer en
+    contact avec toutes les belles idées qui font le charme de notre métier,
+    l'informatique. En effet, c'est l'occasion d'explorer tous les concepts,
+    depuis les langages de haut-niveau (ici le \pc) jusqu'au byte-code. C'est
+    aussi une démontration de l'efficacité qui peut résulter de la combinaison
+    des outils en ligne de commande sous \nom{Unix} (le \texttt{shell},
+    \texttt{xxd}, \texttt{make}, \texttt{vim}, \ldots)
+
+    Je suis globalement satisfait du travail accompli, même s'il
+    reste du travail à faire pour que le \pcc{} approche de \nom{GCC} en
+    termes de convivialité d'utilisation. Je pense en particulier à:
+
+    \begin{itemize}
+        \item Intégrer du code pour un traitement décent des
+        arguments de la ligne de commande avec \nom{getopts}.
+        \item Inclure des scripts pour une installation dans le style
+        \texttt{./configure; make; make install} (\nom{GNU Autotools}).
+        \item Implémenter l'optimisation du code intermédiaire généré
+        (notament le \emph{peep-hole optimization}).
+        \item Intégrer proprement \nom{Cpp} dans le processus de
+        compilation pour que les programmes écrits en PseudoC puissent
+        utiliser des instructions du préprocesseur \ce.
+        \item Documenter proprement le code.
+    \end{itemize}
+
+\begin{thebibliography}{99}
+    \bibitem{EHC} Atze Dijkstra, Jeroen Fokker and S. Doaitse Swierstra:
+    \emph{The Structure of the Essential Haskell Compiler or Coping with
+    Compiler Complexity}, \\
+    \url{http://www.cs.uu.nl/wiki/Ehc/WebHome/}
+
+    \bibitem{ONCS} E. W. Dijkstra, \emph{On the nature of computing
+    science}, \\
+    \url{http://www.cs.utexas.edu/users/EWD/}
+
+    \bibitem{EIP} Alan J. Perlis, \emph{Epigrams in programming}, 
+    SIGPLAN Notices Vol. 17, No. 9, September 1982, pages 7 - 13
+    \url{http://www.cs.yale.edu/quotes.html}
+
+    \bibitem{FS} Flash Sheridan, \emph{Practical Testing of a C99
+    Compiler Using Output Comparison}.
+
+    \bibitem{AGTC} D. L. Bird, C. U. Munoz, \emph{Automatic generation
+    of random self-checking test cases}.
+
+    \bibitem{BOCD} Torben Ægidius Mogensen, \emph{Basics of Compiler
+    Design}.
+
+    \bibitem{CCYB} Tom Niemann, \emph{A compact Guide to LEX \& YACC}.
+
+\end{thebibliography}
+\end{document}

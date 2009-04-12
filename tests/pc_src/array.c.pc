@@ -1,0 +1,38 @@
+int baz[5];
+int echo(int n) {
+    write_string("echo\t");
+    write_int(n);
+    write_string("\n");
+    return n;
+}
+int ftrue(void) { write_string("True\n"); return 1; }
+int ffalse(void) { write_string("False\n"); return 0; }
+void foo(int bar[5]) {
+    int i;
+    i = 0;
+    while ( i < 5 ) {
+        write_string("bar[");
+        write_int(i);
+        write_string("] =\t");
+        write_int(bar[i]);
+        i = i + 1;
+    }
+}
+int main(void) {
+    int tab[5];
+    int i;
+    i = 0;
+    while( i < 5 ) {
+        tab[i] = 42;
+        baz[i] = 75;
+        i = i + 1;
+    }
+    i = 0;
+    while(i < 5) {
+        write_int(tab[i]);
+        i = i + 1;
+    }
+    foo(tab);
+    foo(baz);
+    return 0;
+}

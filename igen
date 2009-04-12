@@ -1,0 +1,7 @@
+#!/bin/bash
+
+
+# Generate a pseudoc program and beautify it
+# with indent using K&R style
+
+generator | indent -kr

@@ -1,0 +1,36 @@
+static int foo;
+int foobar[5];
+int echo(int n) {
+    write_string("echo\t");
+    write_int(n);
+    write_string("\n");
+    return n;
+}
+int ftrue(void) { write_string("True\n"); return 1; }
+int ffalse(void) { write_string("False\n"); return 0; }
+int baz(int n){
+    int k;
+    k = 5;
+    write_int(n+2-k);
+    return n/2;
+}
+int bar(int n){
+    int k;
+    k = n*45;
+    write_int(k);
+    return k / n;
+}
+int main(void) {
+    int k;
+    int bazbaz[1];
+    k = 85;
+    foobar[3] = 7854;
+    bazbaz[10-10] = 5;
+    write_int(k);
+    write_int(foobar[3]);
+    write_int(baz(k));
+    write_int(bar(k));
+    write_int(bazbaz[3/2 - 1]);
+    write_string("\nBye\n");
+    return 0;
+}

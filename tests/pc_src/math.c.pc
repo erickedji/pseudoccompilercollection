@@ -1,0 +1,23 @@
+int echo(int n) {
+    write_string("echo\t");
+    write_int(n);
+    write_string("\n");
+    return n;
+}
+int ftrue(void) { write_string("True\n"); return 1; }
+int ffalse(void) { write_string("False\n"); return 0; }
+int main(void) {
+    write_int(4513-(-5));
+    write_int(8779816+5441);
+    write_int(-451126+8);
+    write_int(4512*853);
+    write_int(-523*-56);
+    write_int(451/85);
+    write_int(12/455263);
+    write_int(7545%452);
+    write_int(-451%563);
+    write_int(54%-56);
+    write_int(-475%-8623);
+    write_int(-45*(1452-855*456)/84/45*452%2);
+    return 0;
+}
