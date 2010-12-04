@@ -7,8 +7,8 @@
 
 #Commentez la ligne avec -NDEBUG et décommentez la suivante
 # pour activer le tracage (utile lors du debuggage)
-#CFLAGS= -Wall -Igc/include -Lgc/lib -DNDEBUG
-CFLAGS = -Wall -g -Igc/include -Lgc/lib
+CFLAGS= -Wall -DNDEBUG
+#CFLAGS = -Wall -g 
 
 # sources files that belong to the interpreter
 INTERPRETER_SOURCES= pseudoci.c ic_parser.c bc_generator.c interpreter.c pci_defs.c
@@ -27,8 +27,8 @@ FILES= $(INTERPRETER_SOURCES) $(COMPILER_SOURCES) 	\
 all: $(EXECUTABLES) rapport.pdf
 
 rapport.pdf: rapport.tex
-	pdflatex rapport.tex 1>/dev/null 2>/dev/null
-	pdflatex rapport.tex 1>/dev/null 2>/dev/null
+	xelatex rapport.tex  1>/dev/null 
+	xelatex rapport.tex  1>/dev/null
 	rm rapport.aux  rapport.log  rapport.out rapport.toc
 
 pseudoci: $(INTERPRETER_SOURCES) $(INTERPRETER_HEADERS) shared.h

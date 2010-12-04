@@ -10,17 +10,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \documentclass[12pt,a4paper,openright]{report}
-\usepackage[utf8]{inputenc}
 \usepackage[english,french]{babel}
+%%% BEGIN XeLaTeX config
+  \usepackage{fontspec}
+  \usepackage{xunicode}
+  \usepackage{xltxtra}
+  \defaultfontfeatures{Mapping=tex-text}
+  \setmainfont{Droid Serif}
+%%% END XeLaTeX config
 \usepackage{url}
-\usepackage[T1]{fontenc}
-\usepackage{charter}
 \usepackage{verbatim} % for verbatim input
 \usepackage{fancyhdr}
 \usepackage{fancyvrb}
 \usepackage[Sonny]{fncychap}
 \usepackage{simplemargins}
-\usepackage[pdftex]{graphicx}
+\usepackage{graphicx}
 
 % eviter l'espace après les deux points dans une url
 \let\urlorig\url
@@ -90,7 +94,7 @@
 \setbottommargin{3cm}
 \setlength{\parskip}{0.5cm}
 
-\usepackage[pdftex,%
+\usepackage[dvipdfm,%
     colorlinks=true,%
     linkcolor=blue,%
     bookmarks=true,%

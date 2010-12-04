@@ -59,6 +59,7 @@ Tests:
 Rapport:
 =======
     Le rapport est dans le fichier `rapport.pdf'.
+    Notez que pour le générer, vous avez besoin de `xelatex`.
 
 Todo:
 =====
